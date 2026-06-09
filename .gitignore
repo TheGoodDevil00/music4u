@@ -1,0 +1,5 @@
+inspo/
+*.md
+node_modules
+.next
+.env
