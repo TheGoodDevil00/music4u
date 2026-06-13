@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { useSearch } from '../_hooks/useTracks';
 import TrackCard from '../_components/cards/TrackCard';
 import ArtistCard from '../_components/cards/ArtistCard';
@@ -8,22 +8,92 @@ import AlbumCard from '../_components/cards/AlbumCard';
 import { Search, SlidersHorizontal, Check } from 'lucide-react';
 import type { SearchFilters } from '../_lib/api/tracks';
 
+
+const genres = ['Pop', 'Alternative', 'Electronic', 'Jazz', 'Indie', 'Psych-Rock', 'R&B', 'Hip-Hop'];
+const moods = ['Dreamy', 'Chill', 'Energetic', 'Dark', 'Groovy', 'Introspective', 'Sensual', 'Melancholic'];
+const eras = ['1950s', '2000s', '2010s', '2020s'];
+
+interface SearchState {
+  inputValue: string;
+  debouncedQuery: string;
+  activeTab: 'tracks' | 'artists' | 'albums';
+  genre: string | undefined;
+  mood: string | undefined;
+  bpmRange: 'all' | 'low' | 'mid' | 'high';
+  era: string | undefined;
+  showFilters: boolean;
+}
+
+type SearchAction =
+  | { type: 'SET_INPUT_VALUE'; payload: string }
+  | { type: 'SET_DEBOUNCED_QUERY'; payload: string }
+  | { type: 'SET_ACTIVE_TAB'; payload: 'tracks' | 'artists' | 'albums' }
+  | { type: 'TOGGLE_FILTERS' }
+  | { type: 'SET_GENRE'; payload: string | undefined }
+  | { type: 'SET_MOOD'; payload: string | undefined }
+  | { type: 'SET_BPM_RANGE'; payload: 'all' | 'low' | 'mid' | 'high' }
+  | { type: 'SET_ERA'; payload: string | undefined }
+  | { type: 'RESET_FILTERS' };
+
+const initialSearchState: SearchState = {
+  inputValue: '',
+  debouncedQuery: '',
+  activeTab: 'tracks',
+  genre: undefined,
+  mood: undefined,
+  bpmRange: 'all',
+  era: undefined,
+  showFilters: false
+};
+
+function searchReducer(state: SearchState, action: SearchAction): SearchState {
+  switch (action.type) {
+    case 'SET_INPUT_VALUE':
+      return { ...state, inputValue: action.payload };
+    case 'SET_DEBOUNCED_QUERY':
+      return { ...state, debouncedQuery: action.payload };
+    case 'SET_ACTIVE_TAB':
+      return { ...state, activeTab: action.payload };
+    case 'TOGGLE_FILTERS':
+      return { ...state, showFilters: !state.showFilters };
+    case 'SET_GENRE':
+      return { ...state, genre: action.payload };
+    case 'SET_MOOD':
+      return { ...state, mood: action.payload };
+    case 'SET_BPM_RANGE':
+      return { ...state, bpmRange: action.payload };
+    case 'SET_ERA':
+      return { ...state, era: action.payload };
+    case 'RESET_FILTERS':
+      return {
+        ...state,
+        genre: undefined,
+        mood: undefined,
+        bpmRange: 'all',
+        era: undefined
+      };
+    default:
+      return state;
+  }
+}
+
 export default function SearchPage() {
-  const [inputValue, setInputValue] = useState('');
-  const [debouncedQuery, setDebouncedQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'tracks' | 'artists' | 'albums'>('tracks');
-  
-  // Filters State
-  const [genre, setGenre] = useState<string | undefined>(undefined);
-  const [mood, setMood] = useState<string | undefined>(undefined);
-  const [bpmRange, setBpmRange] = useState<'all' | 'low' | 'mid' | 'high'>('all');
-  const [era, setEra] = useState<string | undefined>(undefined);
-  const [showFilters, setShowFilters] = useState(false);
+  const [state, dispatch] = useReducer(searchReducer, initialSearchState);
+  const {
+    inputValue,
+    debouncedQuery,
+    activeTab,
+    genre,
+    mood,
+    bpmRange,
+    era,
+    showFilters
+  } = state;
 
   // Debounce input value changes by 300ms
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedQuery(inputValue);
+      dispatch({ type: 'SET_DEBOUNCED_QUERY', payload: inputValue });
     }, 300);
 
     return () => clearTimeout(timer);
@@ -48,10 +118,6 @@ export default function SearchPage() {
 
   const { data: searchResults, isLoading, isError } = useSearch(debouncedQuery, filters);
 
-  const genres = ['Pop', 'Alternative', 'Electronic', 'Jazz', 'Indie', 'Psych-Rock', 'R&B', 'Hip-Hop'];
-  const moods = ['Dreamy', 'Chill', 'Energetic', 'Dark', 'Groovy', 'Introspective', 'Sensual', 'Melancholic'];
-  const eras = ['1950s', '2000s', '2010s', '2020s'];
-
   const resultsCount = searchResults 
     ? {
         tracks: searchResults.tracks.length,
@@ -61,14 +127,12 @@ export default function SearchPage() {
     : { tracks: 0, artists: 0, albums: 0 };
 
   const handleResetFilters = () => {
-    setGenre(undefined);
-    setMood(undefined);
-    setBpmRange('all');
-    setEra(undefined);
+    dispatch({ type: 'RESET_FILTERS' });
   };
 
   return (
     <div className="space-y-8">
+      <title>Search - Music4U</title>
       {/* Header & Search Bar */}
       <div className="border-b border-steel-accent/15 pb-6 space-y-6">
         <div>
@@ -90,12 +154,14 @@ export default function SearchPage() {
               type="text"
               placeholder="Search tracks, artists, or albums..."
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
+              onChange={(e) => dispatch({ type: 'SET_INPUT_VALUE', payload: e.target.value })}
+              aria-label="Search query"
               className="w-full bg-surface-container-low border border-steel-accent/25 rounded-control py-3 pl-12 pr-4 text-white font-interface text-sm focus:outline-none focus:border-white transition-all"
             />
           </div>
           <button
-            onClick={() => setShowFilters(!showFilters)}
+            type="button"
+            onClick={() => dispatch({ type: 'TOGGLE_FILTERS' })}
             className={`flex items-center gap-2 px-4 py-3 rounded-control border text-sm font-semibold transition-all ${
               showFilters || genre || mood || bpmRange !== 'all' || era
                 ? 'bg-midnight-slate text-white border-steel-accent/50'
@@ -113,6 +179,7 @@ export default function SearchPage() {
             <div className="flex items-center justify-between border-b border-steel-accent/10 pb-3">
               <span className="caption-tech text-xs uppercase font-bold text-white">Refine Recommendations</span>
               <button 
+                type="button"
                 onClick={handleResetFilters}
                 className="caption-tech text-[10px] text-slate-hint hover:text-white uppercase transition-colors"
               >
@@ -127,8 +194,9 @@ export default function SearchPage() {
                 <div className="flex flex-wrap gap-1.5">
                   {genres.map((g) => (
                     <button
+                      type="button"
                       key={g}
-                      onClick={() => setGenre(genre === g ? undefined : g)}
+                      onClick={() => dispatch({ type: 'SET_GENRE', payload: genre === g ? undefined : g })}
                       className={`caption-tech text-[9px] uppercase px-2.5 py-1 rounded-full border transition-all ${
                         genre === g
                           ? 'bg-white text-void-eclipse border-white font-bold'
@@ -147,8 +215,9 @@ export default function SearchPage() {
                 <div className="flex flex-wrap gap-1.5">
                   {moods.map((m) => (
                     <button
+                      type="button"
                       key={m}
-                      onClick={() => setMood(mood === m ? undefined : m)}
+                      onClick={() => dispatch({ type: 'SET_MOOD', payload: mood === m ? undefined : m })}
                       className={`caption-tech text-[9px] uppercase px-2.5 py-1 rounded-full border transition-all ${
                         mood === m
                           ? 'bg-white text-void-eclipse border-white font-bold'
@@ -174,8 +243,9 @@ export default function SearchPage() {
                     }[range];
                     return (
                       <button
+                        type="button"
                         key={range}
-                        onClick={() => setBpmRange(range)}
+                        onClick={() => dispatch({ type: 'SET_BPM_RANGE', payload: range })}
                         className={`caption-tech text-[9px] text-left uppercase px-3 py-2 rounded border transition-all flex justify-between items-center ${
                           bpmRange === range
                             ? 'bg-white/10 text-white border-white'
@@ -196,8 +266,9 @@ export default function SearchPage() {
                 <div className="flex flex-wrap gap-1.5">
                   {eras.map((e) => (
                     <button
+                      type="button"
                       key={e}
-                      onClick={() => setEra(era === e ? undefined : e)}
+                      onClick={() => dispatch({ type: 'SET_ERA', payload: era === e ? undefined : e })}
                       className={`caption-tech text-[9px] uppercase px-2.5 py-1 rounded-full border transition-all ${
                         era === e
                           ? 'bg-white text-void-eclipse border-white font-bold'
@@ -218,8 +289,9 @@ export default function SearchPage() {
       <div className="flex border-b border-steel-accent/10">
         {(['tracks', 'artists', 'albums'] as const).map((tab) => (
           <button
+            type="button"
             key={tab}
-            onClick={() => setActiveTab(tab)}
+            onClick={() => dispatch({ type: 'SET_ACTIVE_TAB', payload: tab })}
             className={`caption-tech text-xs uppercase px-6 py-3 border-b-2 font-semibold transition-all relative ${
               activeTab === tab
                 ? 'border-white text-white font-bold'

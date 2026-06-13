@@ -6,12 +6,12 @@ import RecommendationFeed from './_components/recommendation/RecommendationFeed'
 import { mockRecommendationSections } from './_lib/mock/recommendations';
 import { Disc, Activity, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
-
 export default function HomePage() {
   const { data: sections, isLoading, isError, refetch } = useRecommendations('user-123');
 
   return (
     <div className="space-y-12">
+      <title>Music4U - Curated Sonic Engine</title>
       {/* Editorial Hero Banner */}
       <section className="relative py-12 md:py-20 border-b border-steel-accent/10 overflow-hidden">
         {/* Subtle decorative grid background */}
@@ -77,6 +77,7 @@ export default function HomePage() {
           <div className="p-8 text-center rounded-structural bg-surface-container/40 border border-error/20 max-w-xl mx-auto space-y-4">
             <p className="font-interface text-sm text-error">Failed to synchronize auditory profile with recommendation servers.</p>
             <button 
+              type="button"
               onClick={() => refetch()}
               className="px-4 py-2 bg-midnight-slate text-white rounded-control text-xs font-semibold hover:bg-midnight-slate/80 transition-all flex items-center gap-2 mx-auto"
             >
