@@ -9,7 +9,7 @@ export function useRecommendations(userId: string) {
   });
 }
 
-export function useSubmitFeedback() {
+function useSubmitFeedback() {
   const queryClient = useQueryClient();
   
   return useMutation({

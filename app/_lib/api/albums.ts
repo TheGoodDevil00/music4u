@@ -30,8 +30,7 @@ export async function getSimilarAlbums(albumId: string): Promise<Album[]> {
     if (!currentAlbum) return mockAlbums.slice(0, 4);
 
     return mockAlbums
-      .filter(al => al.id !== albumId)
-      .filter(al => al.genres.some(g => currentAlbum.genres.includes(g)))
+      .filter(al => al.id !== albumId && al.genres.some(g => currentAlbum.genres.includes(g)))
       .slice(0, 5);
   }
 
