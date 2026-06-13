@@ -6,11 +6,12 @@ import TrackCard from '../_components/cards/TrackCard';
 import ReasonChip from '../_components/recommendation/ReasonChip';
 import { Disc, Layers, ListFilter } from 'lucide-react';
 
+
+const moodsList = ['Dreamy', 'Chill', 'Energetic', 'Dark', 'Groovy', 'Introspective'];
+
 export default function DiscoverPage() {
   const { data: recommendations, isLoading, isError } = useRecommendations('user-123');
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
-
-  const moodsList = ['Dreamy', 'Chill', 'Energetic', 'Dark', 'Groovy', 'Introspective'];
 
   // Flatten mock recommendations from sections or get them directly
   const allRecs = recommendations || [];
@@ -21,6 +22,7 @@ export default function DiscoverPage() {
 
   return (
     <div className="space-y-8">
+      <title>Discover - Music4U</title>
       {/* Header */}
       <div className="border-b border-steel-accent/15 pb-6">
         <h1 className="display-hero text-white tracking-tight leading-none mb-4">
@@ -39,6 +41,7 @@ export default function DiscoverPage() {
         </div>
         <div className="flex flex-wrap gap-2">
           <button
+            type="button"
             onClick={() => setSelectedMood(null)}
             className={`caption-tech text-xs uppercase px-3 py-1 rounded-full border transition-all ${
               selectedMood === null
@@ -50,6 +53,7 @@ export default function DiscoverPage() {
           </button>
           {moodsList.map((mood) => (
             <button
+              type="button"
               key={mood}
               onClick={() => setSelectedMood(mood)}
               className={`caption-tech text-xs uppercase px-3 py-1 rounded-full border transition-all ${

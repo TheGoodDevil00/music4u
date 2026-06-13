@@ -9,6 +9,7 @@ import { Disc, Calendar, Music, Clock } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
+
 export default function AlbumDetailPage() {
   const params = useParams();
   const albumId = params.id as string;
@@ -42,6 +43,7 @@ export default function AlbumDetailPage() {
 
   return (
     <div className="space-y-12">
+      <title>Album - Music4U</title>
       {/* Album Header Block */}
       <section className="relative rounded-structural bg-gradient-to-r from-surface-container-low to-void-eclipse border border-steel-accent/15 overflow-hidden p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center md:items-end">
         {/* Glow backlight */}
