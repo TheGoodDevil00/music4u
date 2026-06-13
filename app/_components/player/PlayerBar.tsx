@@ -149,6 +149,7 @@ export default function PlayerBar() {
           </Link>
         </div>
         <button 
+          type="button"
           onClick={() => toggleLikeTrack(currentTrack.id)}
           className={`p-2 hover:bg-surface-container/50 rounded-full transition-all group ${
             isLiked ? 'text-white' : 'text-slate-hint hover:text-white'
@@ -163,6 +164,7 @@ export default function PlayerBar() {
         {/* Buttons */}
         <div className="flex items-center gap-5">
           <button 
+            type="button"
             onClick={toggleShuffle}
             className={`p-1.5 transition-all rounded-full hover:bg-surface-container/50 ${
               isShuffle ? 'text-white' : 'text-slate-hint hover:text-white'
@@ -173,6 +175,7 @@ export default function PlayerBar() {
           </button>
           
           <button 
+            type="button"
             onClick={prevTrack}
             className="p-1.5 text-slate-hint hover:text-white transition-all rounded-full hover:bg-surface-container/50"
             title="Previous"
@@ -181,6 +184,7 @@ export default function PlayerBar() {
           </button>
 
           <button 
+            type="button"
             onClick={togglePlay}
             className="w-10 h-10 bg-white hover:bg-silver-mist text-void-eclipse rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow shadow-white/10"
             title={isPlaying ? 'Pause' : 'Play'}
@@ -189,6 +193,7 @@ export default function PlayerBar() {
           </button>
 
           <button 
+            type="button"
             onClick={nextTrack}
             className="p-1.5 text-slate-hint hover:text-white transition-all rounded-full hover:bg-surface-container/50"
             title="Next"
@@ -197,6 +202,7 @@ export default function PlayerBar() {
           </button>
 
           <button 
+            type="button"
             onClick={toggleRepeat}
             className={`p-1.5 transition-all rounded-full hover:bg-surface-container/50 relative ${
               isRepeat !== 'none' ? 'text-white' : 'text-slate-hint hover:text-white'
@@ -220,6 +226,7 @@ export default function PlayerBar() {
               max={duration || 100}
               value={progress}
               onChange={handleSeek}
+              aria-label="Seek position"
               className="w-full h-1 bg-steel-accent/30 rounded-lg appearance-none cursor-pointer accent-white hover:accent-white focus:outline-none group-hover:h-1.5 transition-all"
               style={{
                 background: `linear-gradient(to right, #ffffff 0%, #ffffff ${
@@ -244,6 +251,7 @@ export default function PlayerBar() {
         </div>
 
         <button 
+          type="button"
           onClick={toggleMute}
           className="p-1.5 text-slate-hint hover:text-white transition-all rounded-full hover:bg-surface-container/50"
           title={isMuted ? 'Unmute' : 'Mute'}
@@ -259,6 +267,7 @@ export default function PlayerBar() {
             step="0.01"
             value={isMuted ? 0 : volume}
             onChange={handleVolumeChange}
+            aria-label="Volume"
             className="w-full h-1 bg-steel-accent/30 rounded-lg appearance-none cursor-pointer accent-white hover:accent-white focus:outline-none"
             style={{
               background: `linear-gradient(to right, #ffffff 0%, #ffffff ${
@@ -269,6 +278,7 @@ export default function PlayerBar() {
         </div>
 
         <button 
+          type="button"
           className="p-1.5 text-slate-hint hover:text-white transition-all rounded-full hover:bg-surface-container/50 hidden md:block"
           title="Lyrics / Visualizer"
         >

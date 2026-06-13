@@ -51,7 +51,6 @@ export default function TrackCard({ track, variant = 'grid', index, contextQueue
     // High-density table/list row
     return (
       <div 
-        onClick={handlePlayClick}
         className={`flex items-center gap-4 p-2.5 rounded-control transition-all duration-200 cursor-pointer group ${
           isCurrent 
             ? 'bg-midnight-slate/20 border border-midnight-slate/40' 
@@ -72,7 +71,9 @@ export default function TrackCard({ track, variant = 'grid', index, contextQueue
             )}
           </span>
           <button 
-            className="hidden group-hover:flex text-white hover:scale-110 active:scale-95 transition-transform"
+            type="button"
+            onClick={handlePlayClick}
+            className="hidden group-hover:flex text-white hover:scale-110 active:scale-95 transition-transform bg-transparent border-none p-0 cursor-pointer outline-none"
             aria-label={isCurrentlyPlaying ? 'Pause' : 'Play'}
           >
             {isCurrentlyPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} className="translate-x-[0.5px]" fill="currentColor" />}
@@ -121,10 +122,12 @@ export default function TrackCard({ track, variant = 'grid', index, contextQueue
         {/* Heart Icon & Duration */}
         <div className="flex items-center gap-4 flex-shrink-0">
           <button 
-            onClick={handleLikeClick}
-            className={`opacity-0 group-hover:opacity-100 focus:opacity-100 hover:text-white transition-opacity ${
+            type="button"
+            onClick={(e) => { e.stopPropagation(); handleLikeClick(e); }}
+            className={`opacity-0 group-hover:opacity-100 focus:opacity-100 hover:text-white transition-opacity cursor-pointer bg-transparent border-none p-0 flex items-center justify-center outline-none ${
               isLiked ? 'opacity-100 text-white' : 'text-slate-hint'
             }`}
+            aria-label={isLiked ? "Unlike track" : "Like track"}
           >
             <Heart size={14} fill={isLiked ? 'white' : 'none'} />
           </button>
@@ -139,14 +142,15 @@ export default function TrackCard({ track, variant = 'grid', index, contextQueue
   // Row Layout: similar to list but more compact (used in quick recommendations or queue list)
   if (variant === 'row') {
     return (
-      <div 
+      <button 
+        type="button"
         onClick={handlePlayClick}
-        className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
+        className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors w-full text-left ${
           isCurrent ? 'bg-midnight-slate/15' : 'hover:bg-surface-container-low/60'
         }`}
       >
         <div className="relative w-10 h-10 rounded overflow-hidden ghost-border flex-shrink-0">
-          <Image src={track.albumArtUrl} alt={track.title} fill className="object-cover" />
+          <Image src={track.albumArtUrl} alt={track.title} fill sizes="40px" className="object-cover" />
           <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
             {isCurrentlyPlaying ? <Pause size={14} className="text-white" /> : <Play size={14} className="text-white translate-x-[0.5px]" />}
           </div>
@@ -159,14 +163,13 @@ export default function TrackCard({ track, variant = 'grid', index, contextQueue
           <span className="caption-tech text-[8px] px-1 py-0.2 rounded bg-steel-accent/20 text-silver-mist">{track.key}</span>
           <span className="font-technical text-[10px] text-slate-hint">{formatDuration(track.durationMs)}</span>
         </div>
-      </div>
+      </button>
     );
   }
 
   // Default: Grid Card (Card-based discovery feeds)
   return (
     <div 
-      onClick={handlePlayClick}
       className={`group rounded-structural bg-surface-container/40 p-4 border border-steel-accent/15 hover:border-steel-accent/30 transition-all duration-300 cursor-pointer flex flex-col relative overflow-hidden h-full ${
         isCurrent ? 'bg-surface-container/70 border-steel-accent/40 shadow-md shadow-midnight-slate/10' : ''
       }`}
@@ -183,6 +186,7 @@ export default function TrackCard({ track, variant = 'grid', index, contextQueue
         {/* Play/Pause Button overlay */}
         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 focus-within:opacity-100 flex items-center justify-center transition-all duration-300">
           <button
+            type="button"
             onClick={handlePlayClick}
             className="w-12 h-12 bg-white text-void-eclipse rounded-full flex items-center justify-center transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg"
             aria-label={isCurrentlyPlaying ? 'Pause' : 'Play'}
@@ -228,6 +232,7 @@ export default function TrackCard({ track, variant = 'grid', index, contextQueue
           </span>
           <div className="flex items-center gap-3">
             <button 
+              type="button"
               onClick={handleLikeClick}
               className={`hover:text-white transition-colors ${isLiked ? 'text-white' : 'text-slate-hint'}`}
             >
