@@ -9,17 +9,27 @@ import ArtistCard from '../_components/cards/ArtistCard';
 import { Heart, History, User2, Sliders, Music } from 'lucide-react';
 import Image from 'next/image';
 
+
 export default function ProfilePage() {
   const { data: profile, isLoading, isError } = useUserProfile('user-123');
   
   // Connect with Client Store for local updates
   const { likedTrackIds, listeningHistoryIds, clearHistory } = useUserStore();
 
-  // Map IDs to actual Track objects
-  const likedTracks = mockTracks.filter(t => likedTrackIds.includes(t.id));
-  const historyTracks = listeningHistoryIds
-    .map(id => mockTracks.find(t => t.id === id))
-    .filter((t): t is typeof mockTracks[0] => !!t);
+  // Combine static mock tracks and Spotify-synced tracks for full lookup resolution
+  const allKnownTracks = [
+    ...mockTracks,
+    ...(profile?.listeningHistory || [])
+  ].filter((t, idx, self) => self.findIndex(x => x.id === t.id) === idx);
+
+  const likedTracks = allKnownTracks.filter(t => likedTrackIds.includes(t.id));
+  
+  // If the user has local store history, map it. Otherwise, fall back to the Spotify history.
+  const historyTracks = listeningHistoryIds.length > 0
+    ? listeningHistoryIds
+        .map(id => allKnownTracks.find(t => t.id === id))
+        .filter((t): t is typeof mockTracks[0] => !!t)
+    : profile?.listeningHistory || [];
 
   if (isLoading) {
     return (
@@ -43,6 +53,7 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-12">
+      <title>Taste Profile - Music4U</title>
       {/* Editorial Profile Header */}
       <section className="relative rounded-structural bg-gradient-to-r from-surface-container-low to-void-eclipse border border-steel-accent/15 overflow-hidden p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center md:items-end">
         {/* Glow backlight */}
@@ -129,6 +140,7 @@ export default function ProfilePage() {
                     src={artist.imageUrl} 
                     alt={artist.name} 
                     fill 
+                    sizes="64px"
                     className="object-cover transition-transform group-hover:scale-105" 
                   />
                 </div>
@@ -184,6 +196,7 @@ export default function ProfilePage() {
           </div>
           {historyTracks.length > 0 && (
             <button 
+              type="button"
               onClick={clearHistory}
               className="caption-tech text-[10px] text-slate-hint hover:text-white uppercase transition-colors"
             >
