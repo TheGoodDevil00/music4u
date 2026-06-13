@@ -26,6 +26,17 @@ export interface UserProfile {
 
 export async function getUserProfile(userId: string): Promise<UserProfile> {
   if (USE_MOCK_API) {
+    try {
+      // Check if there is a Spotify-synced profile session
+      const res = await fetch('/api/auth/spotify/session');
+      const { data } = await res.json();
+      if (data) {
+        return data;
+      }
+    } catch (err) {
+      console.warn('Could not retrieve Spotify session, falling back to mock profile:', err);
+    }
+
     await new Promise(r => setTimeout(r, 500));
     
     // Pick some tracks for history
