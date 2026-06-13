@@ -8,17 +8,17 @@ import { usePlayerStore } from '../../_store/playerStore';
 import { useUserStore } from '../../_store/userStore';
 import Image from 'next/image';
 
+const navItems = [
+  { name: 'Home', href: '/', icon: Home },
+  { name: 'Discover', href: '/discover', icon: Disc },
+  { name: 'Search', href: '/search', icon: Search },
+  { name: 'Taste Profile', href: '/profile', icon: User },
+];
+
 export default function Sidebar() {
   const pathname = usePathname();
   const { currentTrack, isPlaying, togglePlay } = usePlayerStore();
   const { setCompletedOnboarding } = useUserStore();
-
-  const navItems = [
-    { name: 'Home', href: '/', icon: Home },
-    { name: 'Discover', href: '/discover', icon: Disc },
-    { name: 'Search', href: '/search', icon: Search },
-    { name: 'Taste Profile', href: '/profile', icon: User },
-  ];
 
   return (
     <aside className="w-64 bg-void-eclipse border-r border-steel-accent/20 flex flex-col h-screen sticky top-0 text-silver-mist">
@@ -63,6 +63,7 @@ export default function Sidebar() {
 
         {/* Prod testing intro screen trigger */}
         <button
+          type="button"
           onClick={() => {
             localStorage.removeItem('music4u-onboarding-completed');
             setCompletedOnboarding(false);

@@ -5,15 +5,15 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Disc, Search, User } from 'lucide-react';
 
+const navItems = [
+  { name: 'Home', href: '/', icon: Home },
+  { name: 'Discover', href: '/discover', icon: Disc },
+  { name: 'Search', href: '/search', icon: Search },
+  { name: 'Taste', href: '/profile', icon: User },
+];
+
 export default function MobileNavbar() {
   const pathname = usePathname();
-
-  const navItems = [
-    { name: 'Home', href: '/', icon: Home },
-    { name: 'Discover', href: '/discover', icon: Disc },
-    { name: 'Search', href: '/search', icon: Search },
-    { name: 'Taste', href: '/profile', icon: User },
-  ];
 
   return (
     <nav className="md:hidden fixed bottom-24 left-0 right-0 h-16 bg-void-eclipse/90 backdrop-blur-md border-t border-steel-accent/20 flex items-center justify-around px-4 z-40 text-silver-mist shadow-lg">
