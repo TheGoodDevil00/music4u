@@ -23,11 +23,11 @@ export async function getSimilarTracks(trackId: string): Promise<Track[]> {
 
     // Find tracks with overlapping genres or moods, excluding the current track
     return mockTracks
-      .filter(t => t.id !== trackId)
-      .filter(t => 
-        t.genre.some(g => currentTrack.genre.includes(g)) || 
-        t.mood.some(m => currentTrack.mood.includes(m))
-      )
+      .filter(t => {
+        if (t.id === trackId) return false;
+        return t.genre.some(g => currentTrack.genre.includes(g)) || 
+          t.mood.some(m => currentTrack.mood.includes(m));
+      })
       .slice(0, 6);
   }
 

@@ -34,8 +34,7 @@ export async function getSimilarArtists(artistId: string): Promise<Artist[]> {
 
     // Find artists with overlapping genres
     return mockArtists
-      .filter(a => a.id !== artistId)
-      .filter(a => a.genres.some(g => currentArtist.genres.includes(g)))
+      .filter(a => a.id !== artistId && a.genres.some(g => currentArtist.genres.includes(g)))
       .slice(0, 5);
   }
 
