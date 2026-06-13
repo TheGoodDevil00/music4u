@@ -9,6 +9,7 @@ import { Play, Plus, Check, Clock, Radio, Activity, Eye } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
+
 const formatDuration = (ms: number) => {
   const totalSeconds = Math.floor(ms / 1000);
   const minutes = Math.floor(totalSeconds / 60);
@@ -67,6 +68,7 @@ export default function TrackDetailPage() {
 
   return (
     <div className="space-y-12">
+      <title>Track - Music4U</title>
       {/* Editorial Header */}
       <section className="relative rounded-structural bg-gradient-to-r from-surface-container-low to-void-eclipse border border-steel-accent/15 overflow-hidden p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center md:items-end">
         {/* Glow backlight */}
@@ -125,6 +127,7 @@ export default function TrackDetailPage() {
           {/* Action Buttons */}
           <div className="flex flex-wrap gap-3 justify-center md:justify-start pt-2">
             <button
+              type="button"
               onClick={handlePlayClick}
               className="px-6 py-2.5 bg-white hover:bg-silver-mist text-void-eclipse rounded-control font-semibold text-xs flex items-center gap-2 transition-all hover:scale-103 shadow shadow-white/5"
             >
@@ -133,6 +136,7 @@ export default function TrackDetailPage() {
             </button>
             
             <button
+              type="button"
               onClick={handleQueueClick}
               disabled={isInQueue}
               className={`px-6 py-2.5 rounded-control font-semibold text-xs flex items-center gap-2 border transition-all ${

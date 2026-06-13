@@ -8,6 +8,7 @@ import ArtistCard from '../../_components/cards/ArtistCard';
 import { User, Users, Disc, ShieldCheck } from 'lucide-react';
 import Image from 'next/image';
 
+
 export default function ArtistDetailPage() {
   const params = useParams();
   const artistId = params.id as string;
@@ -41,6 +42,7 @@ export default function ArtistDetailPage() {
 
   return (
     <div className="space-y-12">
+      <title>Artist - Music4U</title>
       {/* Editorial Header */}
       <section className="relative rounded-structural bg-gradient-to-r from-surface-container-low to-void-eclipse border border-steel-accent/15 overflow-hidden p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center md:items-end">
         {/* Ambient Blur Backlight */}
