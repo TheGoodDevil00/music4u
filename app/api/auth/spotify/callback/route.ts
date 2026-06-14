@@ -57,8 +57,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL('/?onboarding=complete&empty=true', request.url));
     }
 
+    // Filter items to keep only the first (most recent) occurrence of each track ID
+    const uniqueItems: any[] = [];
+    const seenTrackIds = new Set<string>();
+    for (const item of items) {
+      if (item?.track?.id && !seenTrackIds.has(item.track.id)) {
+        seenTrackIds.add(item.track.id);
+        uniqueItems.push(item);
+      }
+    }
+
     // Extract unique track IDs for fetching audio features
-    const trackIds = Array.from(new Set(items.map((item: any) => item.track.id)));
+    const trackIds = uniqueItems.map((item: any) => item.track.id);
 
     // 4. Batch-fetch Audio Features
     const featuresResponse = await fetch(
@@ -75,7 +85,7 @@ export async function GET(request: NextRequest) {
     );
 
     // 5. Transform data to fit the project's Track model format
-    const transformedTracks = items.map((item: any) => {
+    const transformedTracks = uniqueItems.map((item: any) => {
       const t = item.track;
       const feat: any = featuresMap.get(t.id) || {};
       
