@@ -10,6 +10,7 @@ interface UserState {
     name: string;
     avatarUrl: string;
   } | null;
+  spotifyProfile: any | null;
   
   // Actions
   toggleLikeTrack: (trackId: string) => void;
@@ -18,6 +19,7 @@ interface UserState {
   clearHistory: () => void;
   setCompletedOnboarding: (val: boolean) => void;
   setSpotifyUser: (user: { name: string; avatarUrl: string } | null) => void;
+  setSpotifyProfile: (profile: any | null) => void;
 }
 
 export const useUserStore = create<UserState>()(
@@ -28,6 +30,7 @@ export const useUserStore = create<UserState>()(
       listeningHistoryIds: [],
       hasCompletedOnboarding: false,
       spotifyUser: null,
+      spotifyProfile: null,
 
       toggleLikeTrack: (trackId) => set((state) => {
         const alreadyLiked = state.likedTrackIds.includes(trackId);
@@ -53,6 +56,11 @@ export const useUserStore = create<UserState>()(
       setCompletedOnboarding: (val) => set({ hasCompletedOnboarding: val }),
 
       setSpotifyUser: (user) => set({ spotifyUser: user }),
+
+      setSpotifyProfile: (profile) => set({
+        spotifyProfile: profile,
+        spotifyUser: profile ? { name: profile.name, avatarUrl: profile.avatarUrl } : null,
+      }),
     }),
     {
       name: 'music4u-user-store',
