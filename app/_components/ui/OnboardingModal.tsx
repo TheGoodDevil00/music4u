@@ -109,14 +109,22 @@ export default function OnboardingModal() {
       fetch('/api/auth/spotify/session')
         .then(res => res.json())
         .then(({ data }) => {
-          if (data && data.likedTrackIds) {
-            // Update Zustand client store with liked track IDs from Spotify sync
+          if (data) {
             const userStore = useUserStore.getState();
-            data.likedTrackIds.forEach((id: string) => {
-              if (!userStore.likedTrackIds.includes(id)) {
-                userStore.likedTrackIds.push(id);
-              }
-            });
+            if (data.likedTrackIds) {
+              // Update Zustand client store with liked track IDs from Spotify sync
+              data.likedTrackIds.forEach((id: string) => {
+                if (!userStore.likedTrackIds.includes(id)) {
+                  userStore.likedTrackIds.push(id);
+                }
+              });
+            }
+            if (data.name && data.avatarUrl) {
+              userStore.setSpotifyUser({
+                name: data.name,
+                avatarUrl: data.avatarUrl,
+              });
+            }
           }
           dispatch({ type: 'SET_SYNC_STATUS', payload: 'Sync complete! Taste profile generated.' });
           setTimeout(() => {
