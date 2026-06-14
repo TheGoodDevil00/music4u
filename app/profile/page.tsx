@@ -14,7 +14,7 @@ export default function ProfilePage() {
   const { data: profile, isLoading, isError } = useUserProfile('user-123');
   
   // Connect with Client Store for local updates
-  const { likedTrackIds, listeningHistoryIds, clearHistory, spotifyUser, setSpotifyUser } = useUserStore();
+  const { likedTrackIds, listeningHistoryIds, clearHistory, spotifyUser, setSpotifyProfile } = useUserStore();
 
   if (isLoading) {
     return (
@@ -134,7 +134,7 @@ export default function ProfilePage() {
                   type="button"
                   onClick={async () => {
                     await fetch('/api/auth/spotify/session', { method: 'POST' });
-                    setSpotifyUser(null);
+                    setSpotifyProfile(null);
                     useUserStore.setState({
                       likedTrackIds: ['track-1', 'track-3', 'track-4', 'track-13', 'track-25'],
                       listeningHistoryIds: [],
