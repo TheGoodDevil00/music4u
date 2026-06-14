@@ -14,22 +14,7 @@ export default function ProfilePage() {
   const { data: profile, isLoading, isError } = useUserProfile('user-123');
   
   // Connect with Client Store for local updates
-  const { likedTrackIds, listeningHistoryIds, clearHistory } = useUserStore();
-
-  // Combine static mock tracks and Spotify-synced tracks for full lookup resolution
-  const allKnownTracks = [
-    ...mockTracks,
-    ...(profile?.listeningHistory || [])
-  ].filter((t, idx, self) => self.findIndex(x => x.id === t.id) === idx);
-
-  const likedTracks = allKnownTracks.filter(t => likedTrackIds.includes(t.id));
-  
-  // If the user has local store history, map it. Otherwise, fall back to the Spotify history.
-  const historyTracks = listeningHistoryIds.length > 0
-    ? listeningHistoryIds
-        .map(id => allKnownTracks.find(t => t.id === id))
-        .filter((t): t is typeof mockTracks[0] => !!t)
-    : profile?.listeningHistory || [];
+  const { likedTrackIds, listeningHistoryIds, clearHistory, spotifyUser, setSpotifyUser } = useUserStore();
 
   if (isLoading) {
     return (
@@ -51,9 +36,50 @@ export default function ProfilePage() {
     );
   }
 
+  const displayName = spotifyUser?.name || profile.name;
+  const displayAvatar = spotifyUser?.avatarUrl || profile.avatarUrl;
+
+  // Combine static mock tracks and Spotify-synced tracks for full lookup resolution
+  const allKnownTracks = [
+    ...mockTracks,
+    ...(profile?.listeningHistory || [])
+  ].filter((t, idx, self) => self.findIndex(x => x.id === t.id) === idx);
+
+  const likedTracks = allKnownTracks.filter(t => likedTrackIds.includes(t.id));
+  
+  // If the user has local store history, map it. Otherwise, fall back to the Spotify history.
+  const historyTracks = listeningHistoryIds.length > 0
+    ? listeningHistoryIds
+        .map(id => allKnownTracks.find(t => t.id === id))
+        .filter((t): t is typeof mockTracks[0] => !!t)
+    : profile?.listeningHistory || [];
+
   return (
     <div className="space-y-12">
       <title>Taste Profile - Music4U</title>
+
+      {/* Spotify Connection Alert Banner */}
+      {!spotifyUser && (
+        <div className="p-6 rounded-structural bg-surface-container-low border border-steel-accent/20 flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-[#1DB954]/5 rounded-full blur-2xl pointer-events-none" />
+          <div className="space-y-1 z-10">
+            <h4 className="font-editorial text-lg text-white font-bold">Unlinked Spotify Profile</h4>
+            <p className="font-interface text-xs text-slate-hint max-w-xl leading-relaxed">
+              You are currently viewing a simulated mock taste profile. Connect your Spotify account to import your actual listening history, metrics, and taste signals.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              window.location.href = '/api/auth/spotify';
+            }}
+            className="px-5 py-2.5 bg-[#1DB954] hover:bg-[#1ed760] text-void-eclipse font-bold font-interface text-[11px] uppercase tracking-wider rounded-control transition-colors cursor-pointer flex-shrink-0 z-10"
+          >
+            Connect Spotify Account
+          </button>
+        </div>
+      )}
+
       {/* Editorial Profile Header */}
       <section className="relative rounded-structural bg-gradient-to-r from-surface-container-low to-void-eclipse border border-steel-accent/15 overflow-hidden p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center md:items-end">
         {/* Glow backlight */}
@@ -61,8 +87,8 @@ export default function ProfilePage() {
 
         <div className="relative w-36 h-36 rounded-full overflow-hidden ghost-border flex-shrink-0">
           <Image
-            src={profile.avatarUrl}
-            alt={profile.name}
+            src={displayAvatar}
+            alt={displayName}
             fill
             sizes="144px"
             className="object-cover"
@@ -72,11 +98,18 @@ export default function ProfilePage() {
         <div className="flex-1 space-y-4 text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start gap-2 text-slate-hint">
             <User2 size={14} className="text-white" />
-            <span className="caption-tech text-[10px] uppercase font-bold text-white tracking-widest">TACTICAL TASTE SPECTRUM</span>
+            <span className="caption-tech text-[10px] uppercase font-bold text-white tracking-widest">
+              {spotifyUser ? 'SPOTIFY PROFILE ACTIVE' : 'TACTICAL TASTE SPECTRUM'}
+            </span>
           </div>
 
-          <h1 className="font-editorial text-4xl md:text-5xl font-bold text-white tracking-tight leading-tight">
-            {profile.name}
+          <h1 className="font-editorial text-4xl md:text-5xl font-bold text-white tracking-tight leading-tight flex flex-wrap items-center justify-center md:justify-start gap-3">
+            <span>{displayName}</span>
+            {spotifyUser && (
+              <span className="caption-tech text-[9px] uppercase tracking-wider bg-[#1DB954]/20 text-[#1DB954] border border-[#1DB954]/30 px-2.5 py-1 rounded-full font-bold">
+                Connected
+              </span>
+            )}
           </h1>
 
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 text-xs">
@@ -94,6 +127,22 @@ export default function ProfilePage() {
               <Sliders size={14} />
               <span className="font-technical">Avg: {profile.tasteProfile.averageBpm} BPM ({profile.tasteProfile.preferredKey})</span>
             </div>
+
+            {spotifyUser && (
+              <div className="flex items-center gap-1.5 text-slate-hint border-l border-steel-accent/20 pl-6">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await fetch('/api/auth/spotify/session', { method: 'POST' });
+                    setSpotifyUser(null);
+                    window.location.reload();
+                  }}
+                  className="font-technical text-error hover:text-error/80 underline cursor-pointer text-xs transition-colors"
+                >
+                  Disconnect Spotify
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </section>
