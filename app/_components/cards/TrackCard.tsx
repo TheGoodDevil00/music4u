@@ -2,9 +2,8 @@
 
 import React from 'react';
 import type { Track } from '../../_types/track';
-import { usePlayerStore } from '../../_store/playerStore';
 import { useUserStore } from '../../_store/userStore';
-import { Play, Pause, Heart, Clock, Activity } from 'lucide-react';
+import { Play, Heart } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -22,22 +21,14 @@ const formatDuration = (ms: number) => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };
 
-export default function TrackCard({ track, variant = 'grid', index, contextQueue }: TrackCardProps) {
-  const { currentTrack, isPlaying, playTrack, togglePlay } = usePlayerStore();
+export default function TrackCard({ track, variant = 'grid', index }: TrackCardProps) {
   const { likedTrackIds, toggleLikeTrack } = useUserStore();
-
-  const isCurrent = currentTrack?.id === track.id;
-  const isCurrentlyPlaying = isCurrent && isPlaying;
   const isLiked = likedTrackIds.includes(track.id);
 
   const handlePlayClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (isCurrent) {
-      togglePlay();
-    } else {
-      playTrack(track, contextQueue);
-    }
+    window.open(`https://open.spotify.com/track/${track.id}`, '_blank');
   };
 
   const handleLikeClick = (e: React.MouseEvent) => {
@@ -46,37 +37,24 @@ export default function TrackCard({ track, variant = 'grid', index, contextQueue
     toggleLikeTrack(track.id);
   };
 
-
   if (variant === 'list') {
     // High-density table/list row
     return (
       <div 
-        className={`flex items-center gap-4 p-2.5 rounded-control transition-all duration-200 cursor-pointer group ${
-          isCurrent 
-            ? 'bg-midnight-slate/20 border border-midnight-slate/40' 
-            : 'hover:bg-surface-container-low border border-transparent'
-        }`}
+        onClick={handlePlayClick}
+        className="flex items-center gap-4 p-2.5 rounded-control transition-all duration-200 cursor-pointer group hover:bg-surface-container-low border border-transparent"
       >
         {/* Index or Play icon */}
         <div className="w-8 flex items-center justify-center flex-shrink-0">
           <span className="group-hover:hidden text-slate-hint font-technical text-xs">
-            {isCurrent && isPlaying ? (
-              <div className="flex items-end gap-[1.5px] h-3">
-                <span className="w-[1.5px] bg-white rounded-t animate-[bounce_0.8s_infinite_0.1s]" style={{ height: '50%' }} />
-                <span className="w-[1.5px] bg-white rounded-t animate-[bounce_0.8s_infinite_0.3s]" style={{ height: '90%' }} />
-                <span className="w-[1.5px] bg-white rounded-t animate-[bounce_0.8s_infinite_0.2s]" style={{ height: '30%' }} />
-              </div>
-            ) : (
-              index !== undefined ? index + 1 : ''
-            )}
+            {index !== undefined ? index + 1 : ''}
           </span>
           <button 
             type="button"
-            onClick={handlePlayClick}
             className="hidden group-hover:flex text-white hover:scale-110 active:scale-95 transition-transform bg-transparent border-none p-0 cursor-pointer outline-none"
-            aria-label={isCurrentlyPlaying ? 'Pause' : 'Play'}
+            aria-label="Play on Spotify"
           >
-            {isCurrentlyPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} className="translate-x-[0.5px]" fill="currentColor" />}
+            <Play size={14} className="translate-x-[0.5px]" fill="currentColor" />
           </button>
         </div>
 
@@ -92,11 +70,19 @@ export default function TrackCard({ track, variant = 'grid', index, contextQueue
         </div>
 
         <div className="flex-1 min-w-0">
-          <Link href={`/track/${track.id}`} className="font-interface text-sm font-semibold text-white truncate hover:underline block">
+          <Link 
+            href={`/track/${track.id}`} 
+            className="font-interface text-sm font-semibold text-white truncate hover:underline block"
+            onClick={(e) => e.stopPropagation()}
+          >
             {track.title}
           </Link>
           <div className="flex items-center gap-2">
-            <Link href={`/artist/${track.artistId}`} className="font-interface text-xs text-slate-hint truncate hover:underline block">
+            <Link 
+              href={`/artist/${track.artistId}`} 
+              className="font-interface text-xs text-slate-hint truncate hover:underline block"
+              onClick={(e) => e.stopPropagation()}
+            >
               {track.artistName}
             </Link>
           </div>
@@ -104,7 +90,11 @@ export default function TrackCard({ track, variant = 'grid', index, contextQueue
 
         {/* Album title (hidden on small devices) */}
         <div className="hidden md:block w-1/4 truncate text-xs text-slate-hint font-interface">
-          <Link href={`/album/${track.albumId}`} className="hover:underline">
+          <Link 
+            href={`/album/${track.albumId}`} 
+            className="hover:underline"
+            onClick={(e) => e.stopPropagation()}
+          >
             {track.albumTitle}
           </Link>
         </div>
@@ -123,7 +113,7 @@ export default function TrackCard({ track, variant = 'grid', index, contextQueue
         <div className="flex items-center gap-4 flex-shrink-0">
           <button 
             type="button"
-            onClick={(e) => { e.stopPropagation(); handleLikeClick(e); }}
+            onClick={handleLikeClick}
             className={`opacity-0 group-hover:opacity-100 focus:opacity-100 hover:text-white transition-opacity cursor-pointer bg-transparent border-none p-0 flex items-center justify-center outline-none ${
               isLiked ? 'opacity-100 text-white' : 'text-slate-hint'
             }`}
@@ -145,14 +135,12 @@ export default function TrackCard({ track, variant = 'grid', index, contextQueue
       <button 
         type="button"
         onClick={handlePlayClick}
-        className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors w-full text-left ${
-          isCurrent ? 'bg-midnight-slate/15' : 'hover:bg-surface-container-low/60'
-        }`}
+        className="flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors w-full text-left hover:bg-surface-container-low/60"
       >
         <div className="relative w-10 h-10 rounded overflow-hidden ghost-border flex-shrink-0">
           <Image src={track.albumArtUrl} alt={track.title} fill sizes="40px" className="object-cover" />
           <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
-            {isCurrentlyPlaying ? <Pause size={14} className="text-white" /> : <Play size={14} className="text-white translate-x-[0.5px]" />}
+            <Play size={14} className="text-white translate-x-[0.5px]" />
           </div>
         </div>
         <div className="flex-1 min-w-0">
@@ -170,9 +158,8 @@ export default function TrackCard({ track, variant = 'grid', index, contextQueue
   // Default: Grid Card (Card-based discovery feeds)
   return (
     <div 
-      className={`group rounded-structural bg-surface-container/40 p-4 border border-steel-accent/15 hover:border-steel-accent/30 transition-all duration-300 cursor-pointer flex flex-col relative overflow-hidden h-full ${
-        isCurrent ? 'bg-surface-container/70 border-steel-accent/40 shadow-md shadow-midnight-slate/10' : ''
-      }`}
+      onClick={handlePlayClick}
+      className="group rounded-structural bg-surface-container/40 p-4 border border-steel-accent/15 hover:border-steel-accent/30 transition-all duration-300 cursor-pointer flex flex-col relative overflow-hidden h-full"
     >
       {/* Cover Image Container */}
       <div className="relative aspect-square w-full rounded-lg overflow-hidden ghost-border mb-4">
@@ -183,15 +170,14 @@ export default function TrackCard({ track, variant = 'grid', index, contextQueue
           sizes="(max-width: 768px) 100vw, 300px"
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        {/* Play/Pause Button overlay */}
+        {/* Play Button overlay */}
         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 focus-within:opacity-100 flex items-center justify-center transition-all duration-300">
           <button
             type="button"
-            onClick={handlePlayClick}
             className="w-12 h-12 bg-white text-void-eclipse rounded-full flex items-center justify-center transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg"
-            aria-label={isCurrentlyPlaying ? 'Pause' : 'Play'}
+            aria-label="Play on Spotify"
           >
-            {isCurrentlyPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} className="translate-x-[1px]" fill="currentColor" />}
+            <Play size={20} className="translate-x-[1px]" fill="currentColor" />
           </button>
         </div>
 
