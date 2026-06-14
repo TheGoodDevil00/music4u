@@ -112,12 +112,8 @@ export default function OnboardingModal() {
           if (data) {
             const userStore = useUserStore.getState();
             if (data.likedTrackIds) {
-              // Update Zustand client store with liked track IDs from Spotify sync
-              data.likedTrackIds.forEach((id: string) => {
-                if (!userStore.likedTrackIds.includes(id)) {
-                  userStore.likedTrackIds.push(id);
-                }
-              });
+              // Overwrite Zustand client store with authentic Spotify liked track IDs
+              useUserStore.setState({ likedTrackIds: data.likedTrackIds });
             }
             if (data.name && data.avatarUrl) {
               userStore.setSpotifyUser({
