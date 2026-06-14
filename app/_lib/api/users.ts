@@ -4,6 +4,7 @@ import { mockTracks } from '../mock/tracks';
 import { mockArtists } from '../mock/artists';
 import type { Track } from '../../_types/track';
 import type { Artist } from '../../_types/artist';
+import { useUserStore } from '../../_store/userStore';
 
 export interface GenreWeight {
   genre: string;
@@ -31,10 +32,17 @@ export async function getUserProfile(userId: string): Promise<UserProfile> {
       const res = await fetch('/api/auth/spotify/session');
       const { data } = await res.json();
       if (data) {
+        useUserStore.getState().setSpotifyProfile(data);
         return data;
       }
     } catch (err) {
-      console.warn('Could not retrieve Spotify session, falling back to mock profile:', err);
+      console.warn('Could not retrieve Spotify session, trying local fallback:', err);
+    }
+
+    // Fallback to client-side persisted Spotify profile
+    const persistedProfile = useUserStore.getState().spotifyProfile;
+    if (persistedProfile) {
+      return persistedProfile;
     }
 
     await new Promise(r => setTimeout(r, 500));
