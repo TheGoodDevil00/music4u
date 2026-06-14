@@ -3,31 +3,46 @@ import { apiClient } from './client';
 import { mockRecommendations } from '../mock/recommendations';
 import type { Recommendation } from '../../_types/recommendation';
 
+import { useUserStore } from '../../_store/userStore';
+
 export async function getRecommendations(userId: string): Promise<Recommendation[]> {
   if (USE_MOCK_API) {
+    let history: any[] = [];
+
     try {
       const res = await fetch('/api/auth/spotify/session');
       const { data } = await res.json();
-      if (data && data.listeningHistory && data.listeningHistory.length > 0) {
-        // Generate dynamic recommendations from Spotify listening history
-        const history = data.listeningHistory;
-        return history.map((track: any, i: number) => {
-          let sectionId = 'rec-recent';
-          if (i >= 5 && i < 10) sectionId = 'rec-genre';
-          else if (i >= 10) sectionId = 'rec-chill';
-
-          return {
-            id: `rec-spotify-${track.id}-${i}`,
-            track,
-            score: parseFloat((0.99 - (i * 0.005)).toFixed(3)),
-            reason: `Based on your recent listening of ${track.artistName}`,
-            signals: ['spotify_sync', 'acoustic_overlap', 'user_preference'],
-            sectionId,
-          };
-        });
+      if (data && data.listeningHistory) {
+        history = data.listeningHistory;
       }
     } catch (err) {
-      console.warn('Could not load Spotify session for recommendations, using mock:', err);
+      console.warn('Could not load Spotify session for recommendations, trying local fallback:', err);
+    }
+
+    // Fallback to client-side persisted profile
+    if (history.length === 0) {
+      const persistedProfile = useUserStore.getState().spotifyProfile;
+      if (persistedProfile && persistedProfile.listeningHistory) {
+        history = persistedProfile.listeningHistory;
+      }
+    }
+
+    if (history.length > 0) {
+      // Generate dynamic recommendations from Spotify listening history
+      return history.map((track: any, i: number) => {
+        let sectionId = 'rec-recent';
+        if (i >= 5 && i < 10) sectionId = 'rec-genre';
+        else if (i >= 10) sectionId = 'rec-chill';
+
+        return {
+          id: `rec-spotify-${track.id}-${i}`,
+          track,
+          score: parseFloat((0.99 - (i * 0.005)).toFixed(3)),
+          reason: `Based on your recent listening of ${track.artistName}`,
+          signals: ['spotify_sync', 'acoustic_overlap', 'user_preference'],
+          sectionId,
+        };
+      });
     }
 
     // Simulate network latency so loading states are tested
