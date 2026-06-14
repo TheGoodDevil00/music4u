@@ -115,12 +115,7 @@ export default function OnboardingModal() {
               // Overwrite Zustand client store with authentic Spotify liked track IDs
               useUserStore.setState({ likedTrackIds: data.likedTrackIds });
             }
-            if (data.name && data.avatarUrl) {
-              userStore.setSpotifyUser({
-                name: data.name,
-                avatarUrl: data.avatarUrl,
-              });
-            }
+            userStore.setSpotifyProfile(data);
           }
           dispatch({ type: 'SET_SYNC_STATUS', payload: 'Sync complete! Taste profile generated.' });
           setTimeout(() => {
