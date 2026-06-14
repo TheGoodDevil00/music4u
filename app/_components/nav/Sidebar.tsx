@@ -4,7 +4,6 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Disc, Search, User, Music, Volume2, Maximize2, Sliders } from 'lucide-react';
-import { usePlayerStore } from '../../_store/playerStore';
 import { useUserStore } from '../../_store/userStore';
 import Image from 'next/image';
 
@@ -17,7 +16,6 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { currentTrack, isPlaying, togglePlay } = usePlayerStore();
   const { setCompletedOnboarding, spotifyUser } = useUserStore();
 
   return (
@@ -120,48 +118,6 @@ export default function Sidebar() {
           <span className="caption-tech text-[10px] uppercase font-bold tracking-wider">Intro Screen Test</span>
         </button>
       </nav>
-
-      {/* Mini Now Playing Card on Desktop */}
-      {currentTrack && (
-        <div className="p-4 m-4 rounded-xl bg-surface-container-low border border-steel-accent/20 transition-all duration-300 hover:border-steel-accent/40 group relative overflow-hidden">
-          {/* Subtle glow background */}
-          <div className="absolute inset-0 bg-gradient-to-t from-midnight-slate/10 to-transparent pointer-events-none" />
-          
-          <div className="flex items-center gap-3 relative z-10">
-            <div className="relative w-12 h-12 rounded-control overflow-hidden ghost-border flex-shrink-0">
-              <Image
-                src={currentTrack.albumArtUrl}
-                alt={currentTrack.albumTitle}
-                fill
-                sizes="48px"
-                className={`object-cover ${isPlaying ? 'animate-[spin_10s_linear_infinite]' : ''}`}
-              />
-            </div>
-            <div className="flex-1 min-w-0">
-              <Link href={`/track/${currentTrack.id}`} className="font-interface text-xs font-semibold text-white truncate hover:underline block">
-                {currentTrack.title}
-              </Link>
-              <Link href={`/artist/${currentTrack.artistId}`} className="font-interface text-[11px] text-slate-hint truncate hover:underline block">
-                {currentTrack.artistName}
-              </Link>
-            </div>
-            
-            {/* Visualizer bars indicating playback */}
-            {isPlaying && (
-              <div className="flex items-end gap-[2px] h-3">
-                <span className="w-[2px] bg-white rounded-t animate-[bounce_0.8s_infinite_0.1s]" style={{ height: '60%' }} />
-                <span className="w-[2px] bg-white rounded-t animate-[bounce_0.8s_infinite_0.3s]" style={{ height: '95%' }} />
-                <span className="w-[2px] bg-white rounded-t animate-[bounce_0.8s_infinite_0.2s]" style={{ height: '40%' }} />
-              </div>
-            )}
-          </div>
-          
-          <div className="mt-3 flex items-center justify-between text-[10px] text-slate-hint relative z-10">
-            <span className="caption-tech uppercase">{currentTrack.bpm} BPM</span>
-            <span className="caption-tech uppercase text-[9px] px-1.5 py-0.5 rounded-full bg-steel-accent/30 text-silver-mist">{currentTrack.key}</span>
-          </div>
-        </div>
-      )}
     </aside>
   );
 }
