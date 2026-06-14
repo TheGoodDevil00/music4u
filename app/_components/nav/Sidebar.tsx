@@ -18,7 +18,7 @@ const navItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { currentTrack, isPlaying, togglePlay } = usePlayerStore();
-  const { setCompletedOnboarding } = useUserStore();
+  const { setCompletedOnboarding, spotifyUser } = useUserStore();
 
   return (
     <aside className="w-64 bg-void-eclipse border-r border-steel-accent/20 flex flex-col h-screen sticky top-0 text-silver-mist">
@@ -59,6 +59,50 @@ export default function Sidebar() {
               </Link>
             );
           })}
+        </div>
+
+        {/* Spotify Profile Section */}
+        <div className="mt-auto pt-4 border-t border-steel-accent/10 mb-4">
+          {spotifyUser ? (
+            <div className="flex items-center gap-3 p-2 rounded-control bg-surface-container/20 border border-steel-accent/10">
+              <div className="relative w-9 h-9 rounded-full overflow-hidden ghost-border flex-shrink-0">
+                <Image
+                  src={spotifyUser.avatarUrl}
+                  alt={spotifyUser.name}
+                  fill
+                  sizes="36px"
+                  className="object-cover"
+                />
+                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#1DB954] border border-void-eclipse rounded-full" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <span className="font-interface text-xs font-semibold text-white block truncate">
+                  {spotifyUser.name}
+                </span>
+                <span className="caption-tech text-[8px] uppercase tracking-wider text-[#1DB954] font-bold">
+                  Spotify Sync Active
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2 p-2.5 rounded-control bg-surface-container-low/40 border border-steel-accent/10">
+              <div className="flex items-center gap-2 text-slate-hint">
+                <div className="w-6 h-6 rounded-full bg-steel-accent/20 flex items-center justify-center">
+                  <User size={12} />
+                </div>
+                <span className="font-interface text-xs">Offline Profile</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  window.location.href = '/api/auth/spotify';
+                }}
+                className="w-full text-center py-2 px-3 rounded-control bg-[#1DB954] hover:bg-[#1ed760] text-void-eclipse font-bold font-interface text-[10px] uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <span>Connect Spotify</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Prod testing intro screen trigger */}
