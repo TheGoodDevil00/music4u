@@ -48,15 +48,67 @@ export async function searchAll(
   filters: SearchFilters = {}
 ): Promise<{ tracks: Track[]; artists: any[]; albums: any[] }> {
   if (USE_MOCK_API) {
+    let sourceTracks = mockTracks;
+    let sourceArtists: any[] = [];
+    let sourceAlbums: any[] = [];
+    let isSpotify = false;
+
+    try {
+      const res = await fetch('/api/auth/spotify/session');
+      const { data } = await res.json();
+      if (data && data.listeningHistory && data.listeningHistory.length > 0) {
+        sourceTracks = data.listeningHistory;
+        isSpotify = true;
+        
+        // Dynamically extract unique artists and albums from Spotify tracks
+        const artistsMap = new Map();
+        const albumsMap = new Map();
+
+        sourceTracks.forEach((t: any) => {
+          if (!artistsMap.has(t.artistId)) {
+            artistsMap.set(t.artistId, {
+              id: t.artistId,
+              name: t.artistName,
+              imageUrl: t.albumArtUrl,
+              genres: t.genre,
+              bio: 'Spotify artist from your history',
+              popularity: 85,
+              followers: 250000,
+            });
+          }
+          if (!albumsMap.has(t.albumId)) {
+            albumsMap.set(t.albumId, {
+              id: t.albumId,
+              title: t.albumTitle,
+              artistId: t.artistId,
+              artistName: t.artistName,
+              albumArtUrl: t.albumArtUrl,
+              releaseYear: t.releaseYear,
+              genres: t.genre,
+            });
+          }
+        });
+
+        sourceArtists = Array.from(artistsMap.values());
+        sourceAlbums = Array.from(albumsMap.values());
+      }
+    } catch (err) {
+      console.warn('Could not read Spotify session for search:', err);
+    }
+
+    if (!isSpotify) {
+      // Import mock datasets inline to prevent circular dependencies
+      const { mockArtists } = await import('../mock/artists');
+      const { mockAlbums } = await import('../mock/albums');
+      sourceArtists = mockArtists;
+      sourceAlbums = mockAlbums;
+    }
+
     await new Promise(r => setTimeout(r, 300));
     const lowerQuery = query.toLowerCase();
 
-    // Import mock datasets inline to prevent circular dependencies
-    const { mockArtists } = await import('../mock/artists');
-    const { mockAlbums } = await import('../mock/albums');
-
     // Filter tracks
-    let tracks = mockTracks.filter(t => 
+    let tracks = sourceTracks.filter(t => 
       t.title.toLowerCase().includes(lowerQuery) ||
       t.artistName.toLowerCase().includes(lowerQuery) ||
       t.albumTitle.toLowerCase().includes(lowerQuery)
@@ -88,13 +140,13 @@ export async function searchAll(
     }
 
     // Filter artists
-    const artists = mockArtists.filter(a => 
+    const artists = sourceArtists.filter(a => 
       a.name.toLowerCase().includes(lowerQuery) ||
-      a.genres.some(g => g.toLowerCase().includes(lowerQuery))
+      (a.genres && a.genres.some((g: string) => g.toLowerCase().includes(lowerQuery)))
     );
 
     // Filter albums
-    const albums = mockAlbums.filter(al => 
+    const albums = sourceAlbums.filter(al => 
       al.title.toLowerCase().includes(lowerQuery) ||
       al.artistName.toLowerCase().includes(lowerQuery)
     );
