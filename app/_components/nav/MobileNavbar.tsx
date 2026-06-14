@@ -19,7 +19,7 @@ export default function MobileNavbar() {
   const { spotifyUser } = useUserStore();
 
   return (
-    <nav className="md:hidden fixed bottom-24 left-0 right-0 h-16 bg-void-eclipse/90 backdrop-blur-md border-t border-steel-accent/20 flex items-center justify-around px-4 z-40 text-silver-mist shadow-lg">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-void-eclipse/90 backdrop-blur-md border-t border-steel-accent/20 flex items-center justify-around px-4 z-40 text-silver-mist shadow-lg">
       {navItems.map((item) => {
         const Icon = item.icon;
         const isActive = pathname === item.href;
