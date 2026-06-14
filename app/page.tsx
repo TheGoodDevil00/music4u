@@ -6,8 +6,50 @@ import RecommendationFeed from './_components/recommendation/RecommendationFeed'
 import { mockRecommendationSections } from './_lib/mock/recommendations';
 import { Disc, Activity, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
+import { useUserStore } from './_store/userStore';
+
 export default function HomePage() {
   const { data: sections, isLoading, isError, refetch } = useRecommendations('user-123');
+  const { spotifyUser } = useUserStore();
+
+  const sectionsData = React.useMemo(() => {
+    if (!sections || sections.length === 0) return [];
+    if (!spotifyUser) return mockRecommendationSections;
+
+    // Group recommendations by sectionId
+    const groups: Record<string, typeof sections> = {};
+    sections.forEach((rec) => {
+      const secId = rec.sectionId || 'rec-general';
+      if (!groups[secId]) groups[secId] = [];
+      groups[secId].push(rec);
+    });
+
+    const sectionTitles: Record<string, { title: string; desc: string }> = {
+      'rec-recent': { 
+        title: 'Recently Synced from Spotify', 
+        desc: 'Auditory signals synced directly from your Spotify playback history.' 
+      },
+      'rec-genre': { 
+        title: 'Acoustic Centroid Recommendations', 
+        desc: 'Tracks matching your computed core genre preferences.' 
+      },
+      'rec-chill': { 
+        title: 'Chill Out & Downtempo', 
+        desc: 'Smooth, acoustic-leaning, and ambient-textured songs for a relaxed environment.' 
+      },
+      'rec-general': { 
+        title: 'Personalized Recommendations', 
+        desc: 'Curated signals matching your general listening profile.' 
+      },
+    };
+
+    return Object.entries(groups).map(([id, recs]) => ({
+      id,
+      title: sectionTitles[id]?.title || 'Recommended for You',
+      description: sectionTitles[id]?.desc || 'Acoustic signals matching your taste profile.',
+      recommendations: recs,
+    }));
+  }, [sections, spotifyUser]);
 
   return (
     <div className="space-y-12">
@@ -85,7 +127,7 @@ export default function HomePage() {
             </button>
           </div>
         ) : (
-          <RecommendationFeed sections={mockRecommendationSections} />
+          <RecommendationFeed sections={sectionsData} />
         )}
       </div>
     </div>
