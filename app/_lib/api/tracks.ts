@@ -2,6 +2,7 @@ import { USE_MOCK_API } from '../config';
 import { apiClient } from './client';
 import { mockTracks } from '../mock/tracks';
 import type { Track } from '../../_types/track';
+import { useUserStore } from '../../_store/userStore';
 
 export async function getTrack(trackId: string): Promise<Track> {
   if (USE_MOCK_API) {
@@ -59,41 +60,51 @@ export async function searchAll(
       if (data && data.listeningHistory && data.listeningHistory.length > 0) {
         sourceTracks = data.listeningHistory;
         isSpotify = true;
-        
-        // Dynamically extract unique artists and albums from Spotify tracks
-        const artistsMap = new Map();
-        const albumsMap = new Map();
-
-        sourceTracks.forEach((t: any) => {
-          if (!artistsMap.has(t.artistId)) {
-            artistsMap.set(t.artistId, {
-              id: t.artistId,
-              name: t.artistName,
-              imageUrl: t.albumArtUrl,
-              genres: t.genre,
-              bio: 'Spotify artist from your history',
-              popularity: 85,
-              followers: 250000,
-            });
-          }
-          if (!albumsMap.has(t.albumId)) {
-            albumsMap.set(t.albumId, {
-              id: t.albumId,
-              title: t.albumTitle,
-              artistId: t.artistId,
-              artistName: t.artistName,
-              albumArtUrl: t.albumArtUrl,
-              releaseYear: t.releaseYear,
-              genres: t.genre,
-            });
-          }
-        });
-
-        sourceArtists = Array.from(artistsMap.values());
-        sourceAlbums = Array.from(albumsMap.values());
       }
     } catch (err) {
-      console.warn('Could not read Spotify session for search:', err);
+      console.warn('Could not read Spotify session for search, trying local fallback:', err);
+    }
+
+    if (!isSpotify) {
+      const persistedProfile = useUserStore.getState().spotifyProfile;
+      if (persistedProfile && persistedProfile.listeningHistory && persistedProfile.listeningHistory.length > 0) {
+        sourceTracks = persistedProfile.listeningHistory;
+        isSpotify = true;
+      }
+    }
+
+    if (isSpotify) {
+      // Dynamically extract unique artists and albums from Spotify tracks
+      const artistsMap = new Map();
+      const albumsMap = new Map();
+
+      sourceTracks.forEach((t: any) => {
+        if (!artistsMap.has(t.artistId)) {
+          artistsMap.set(t.artistId, {
+            id: t.artistId,
+            name: t.artistName,
+            imageUrl: t.albumArtUrl,
+            genres: t.genre,
+            bio: 'Spotify artist from your history',
+            popularity: 85,
+            followers: 250000,
+          });
+        }
+        if (!albumsMap.has(t.albumId)) {
+          albumsMap.set(t.albumId, {
+            id: t.albumId,
+            title: t.albumTitle,
+            artistId: t.artistId,
+            artistName: t.artistName,
+            albumArtUrl: t.albumArtUrl,
+            releaseYear: t.releaseYear,
+            genres: t.genre,
+          });
+        }
+      });
+
+      sourceArtists = Array.from(artistsMap.values());
+      sourceAlbums = Array.from(albumsMap.values());
     }
 
     if (!isSpotify) {
