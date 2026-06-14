@@ -135,6 +135,10 @@ export default function ProfilePage() {
                   onClick={async () => {
                     await fetch('/api/auth/spotify/session', { method: 'POST' });
                     setSpotifyUser(null);
+                    useUserStore.setState({
+                      likedTrackIds: ['track-1', 'track-3', 'track-4', 'track-13', 'track-25'],
+                      listeningHistoryIds: [],
+                    });
                     window.location.reload();
                   }}
                   className="font-technical text-error hover:text-error/80 underline cursor-pointer text-xs transition-colors"
