@@ -4,7 +4,6 @@ import './globals.css';
 import Providers from './providers';
 import Sidebar from './_components/nav/Sidebar';
 import MobileNavbar from './_components/nav/MobileNavbar';
-import PlayerBar from './_components/player/PlayerBar';
 import OnboardingModal from './_components/ui/OnboardingModal';
 
 const playfair = Playfair_Display({
@@ -43,7 +42,7 @@ export default function RootLayout({
     >
       <body className="min-h-full bg-void-eclipse text-silver-mist flex flex-col font-interface select-none">
         <Providers>
-          <div className="flex min-h-screen relative pb-48 md:pb-24">
+          <div className="flex min-h-screen relative pb-20 md:pb-8">
             {/* Onboarding Screen */}
             <OnboardingModal />
 
@@ -59,9 +58,6 @@ export default function RootLayout({
 
             {/* Mobile Bottom Tab Bar (hidden on desktop) */}
             <MobileNavbar />
-
-            {/* Persistent bottom player bar */}
-            <PlayerBar />
           </div>
         </Providers>
       </body>
